@@ -1,6 +1,7 @@
 ﻿using DLMC.Launcher.Memory;
 using DLMC.Shared;
 using DLMC.Shared.Message;
+using DLMC.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +20,9 @@ namespace DLMC.Launcher.Net
         protected MapId _mapId = MapId.MainMenu;
 
         // Messages
-        protected PadUpdate _cachedPadUpdate = new PadUpdate();
-        protected PlayerUpdate _cachedPlayerUpdate = new PlayerUpdate();
+        protected PadUpdate _cachedLocalPadUpdate = new PadUpdate();
+        protected PlayerUpdate _cachedLocalPlayerUpdate = new PlayerUpdate();
+        protected MenuUpdate _cachedLocalMenuUpdate = new MenuUpdate();
 
         public virtual void Update()
         {
@@ -52,14 +54,21 @@ namespace DLMC.Launcher.Net
                 ushort missionId = PCSX2.Read<ushort>(Deadlocked.MISSION_ID);
 
                 // Send pad
-                _cachedPadUpdate.Read(Deadlocked.GetPadPointer(_logic.LocalPlayerId));
-                _logic.Send(_cachedPadUpdate);
+                _cachedLocalPadUpdate.Read(Deadlocked.GetPadPointer(_logic.LocalPlayerId));
+                _logic.Send(_cachedLocalPadUpdate);
 
                 if (_mapId != MapId.MainMenu)
                 {
                     // Send player
-                    _cachedPlayerUpdate.Read(Deadlocked.GetPlayerStructPointer(_mapId, _logic.LocalPlayerId));
-                    _logic.Send(_cachedPlayerUpdate);
+                    _cachedLocalPlayerUpdate.Read(Deadlocked.GetPlayerStructPointer(_mapId, _logic.LocalPlayerId));
+                    _logic.Send(_cachedLocalPlayerUpdate);
+                }
+
+                // Send menu
+                if (Deadlocked.IsInMenu() || _mapId == MapId.MainMenu)
+                {
+                    _cachedLocalMenuUpdate.Read();
+                    _logic.Send(_cachedLocalMenuUpdate);
                 }
             }
         }
@@ -78,6 +87,11 @@ namespace DLMC.Launcher.Net
                         OnPlayerUpdate(message as PlayerUpdate);
                         break;
                     }
+                case MessageId.MenuUpdate:
+                    {
+                        OnMenuUpdate(message as MenuUpdate);
+                        break;
+                    }
             }
         }
 
@@ -93,6 +107,11 @@ namespace DLMC.Launcher.Net
         protected virtual void OnPlayerUpdate(PlayerUpdate player)
         {
             player.Lerp(Deadlocked.GetPlayerStructPointer(_mapId, _logic.RemotePlayerId));
+        }
+
+        protected virtual void OnMenuUpdate(MenuUpdate menu)
+        {
+
         }
     }
 }

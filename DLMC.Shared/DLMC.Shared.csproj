@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="BaseLogic.cs" />
     <Compile Include="LogicTimer.cs" />
+    <Compile Include="Message\MenuUpdate.cs" />
     <Compile Include="Message\MessageBase.cs" />
     <Compile Include="Message\MessageCache.cs" />
     <Compile Include="Message\PadUpdate.cs" />

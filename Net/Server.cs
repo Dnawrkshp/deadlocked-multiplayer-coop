@@ -1,5 +1,6 @@
 ﻿using DLMC.Launcher.Memory;
 using DLMC.Server;
+using DLMC.Shared.Message;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,11 @@ namespace DLMC.Launcher.Net
 
             if (!PCSX2.HasInstance())
                 PCSX2.Start(_options.PCSX2Path, _options.DLPath);
+        }
+
+        protected override void OnMenuUpdate(MenuUpdate menu)
+        {
+            base.OnMenuUpdate(menu);
         }
     }
 }

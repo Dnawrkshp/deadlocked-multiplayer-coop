@@ -18,5 +18,11 @@ namespace DLMC.Launcher
         /// </summary>
         public static float MaxPositionDeltaBeforeTeleport = 5f;
 
+        /// <summary>
+        /// How many seconds after a menu selection change to force an update.
+        /// This improves menu sychronization at a performance cost.
+        /// </summary>
+        public static float MenuForceRefreshPeriod = 0.1f;
+
     }
 }

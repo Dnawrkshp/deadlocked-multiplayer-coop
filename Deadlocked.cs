@@ -41,17 +41,51 @@ namespace DLMC.Launcher
 
         // Contains an array of pointers to each player struct by player id
         // TODO: find pointers for each level
-        public static readonly IntPtr PLAYER_STRUCT_PTR_BATTLEDOME = (IntPtr)0x003660F8;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_CATACROM = (IntPtr)0x00362C78;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_SARATHOS = (IntPtr)0x00362BF8;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_DARKCATHEDRAL = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_SHAAR = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_VALIX = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_MININGFACILITY = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_TORVAL = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_TEMPUS = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_MARAXUS = (IntPtr)0x00;
-        public static readonly IntPtr PLAYER_STRUCT_PTR_GHOSTSTATION = (IntPtr)0x00;
+        public static readonly IntPtr LEVEL_PTR = (IntPtr)0x001EEB70;
+
+        // Offset from level pointer to the array of player struct pointers
+        public static readonly int PLAYER_STRUCT_ARRAY_OFFSET = -0x5E54;
+
+        // Menu pointers
+        public static readonly IntPtr MENU_PTR_MAIN = (IntPtr)0x00307254;
+        public static readonly IntPtr MENU_PTR_BATTLEDOME = (IntPtr)0x0032F294;
+        public static readonly IntPtr MENU_PTR_CATACROM = (IntPtr)0x0032BE14;
+        public static readonly IntPtr MENU_PTR_SARATHOS = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_DARKCATHEDRAL = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_SHAAR = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_VALIX = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_MININGFACILITY = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_TORVAL = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_TEMPUS = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_MARAXUS = (IntPtr)0x00;
+        public static readonly IntPtr MENU_PTR_GHOSTSTATION = (IntPtr)0x00;
+
+        // Menu offsets from respective menu pointers
+
+        public static readonly int CHANGECHALLENGEDIALOG_SEL_OFFSET = -0x1CC;
+        public static readonly int CHANGEPLANETDIALOG_SEL_OFFSET = -0x20;
+
+        public static readonly int MENU_OPEN_OFFSET = -0x494;
+        public static readonly int MENU_ID_OFFSET = -0x490;
+
+        public static readonly int STARTMENU_SEL_OFFSET = 0x2C;
+
+        public static readonly int WEAPONMENU_SUBMENU_INDEX_OFFSET = 0x45A4;
+        public static readonly int WEAPONMENU_SUBMENU_REFRESH_OFFSET = 0x45AC;
+        public static readonly int WEAPONMENU_WEAPON_SEL_OFFSET = 0x45B0;
+        public static readonly int WEAPONMENU_SUBMENU_SEL_OFFSET = 0x45B4;
+        public static readonly int WEAPONMENU_OMEGA_SEL_OFFSET = 0x45B8;
+        public static readonly int WEAPONMENU_ALPHA_SEL_OFFSET = 0x45BC;
+
+        public static readonly int SKILLSMENU_SEL_OFFSET = 0x95B0;
+        public static readonly int CHALLENGEMENU_SEL_OFFSET = 0x528C;
+
+        public static readonly int PLANETMENU_SEL_REFRESH_OFFSET = 0x4108;
+        public static readonly int PLANETMENU_SEL_OFFSET = 0x4344;
+        public static readonly int PLANETMENU_CHALLENGE_SEL_OFFSET = 0x39B8;
+
+        public static readonly int SAVEMENU_SEL_OFFSET = 0x7788;
+        public static readonly int DIFFICULTYMENU_SEL_OFFSET = 0x14460;
 
         // Current mission id
         public static readonly IntPtr MISSION_ID = (IntPtr)0x001711A8;
@@ -109,26 +143,11 @@ namespace DLMC.Launcher
 
         public static IntPtr GetPlayerStructPointer(MapId map, int playerIndex)
         {
-            int offset = playerIndex * 4;
-            switch (map)
-            {
-                case MapId.Battledome: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_BATTLEDOME + offset);
-                case MapId.Catacrom: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_CATACROM + offset);
-                case MapId.Sarathos: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_SARATHOS + offset);
-                case MapId.DarkCathedral: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_DARKCATHEDRAL + offset);
-                case MapId.Shaar: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_SHAAR + offset);
-                case MapId.Valix: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_VALIX + offset);
-                case MapId.MiningFacility: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_MININGFACILITY + offset);
-                case MapId.Torval: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_TORVAL + offset);
-                case MapId.Tempus: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_TEMPUS + offset);
-                case MapId.Maraxus: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_MARAXUS + offset);
-                case MapId.GhostStation: return (IntPtr)PCSX2.Read<int>(PLAYER_STRUCT_PTR_GHOSTSTATION + offset);
-                default: return IntPtr.Zero;
-            }
+            return (IntPtr)PCSX2.Read<int>((IntPtr)PCSX2.Read<int>(LEVEL_PTR) + PLAYER_STRUCT_ARRAY_OFFSET + (playerIndex * 4));
         }
 
         #endregion
-        
+
         #region Player Update
 
         public static void Read(this PlayerUpdate player, IntPtr playerStruct)
@@ -194,6 +213,135 @@ namespace DLMC.Launcher
             // Lerp camera rotation
             current.CameraPitch = current.CameraPitch.Lerp(player.CameraPitch, 1f);
             current.CameraYaw = current.CameraYaw.Lerp(player.CameraYaw, 1f);
+        }
+
+        #endregion
+
+
+        #region Menu
+
+        public static IntPtr GetMenuStart(MapId map)
+        {
+            switch (map)
+            {
+                case MapId.Battledome: return MENU_PTR_BATTLEDOME;
+                case MapId.Catacrom: return MENU_PTR_CATACROM;
+                case MapId.Sarathos: return MENU_PTR_SARATHOS;
+                case MapId.DarkCathedral: return MENU_PTR_DARKCATHEDRAL;
+                case MapId.Shaar: return MENU_PTR_SHAAR;
+                case MapId.Valix: return MENU_PTR_VALIX;
+                case MapId.MiningFacility: return MENU_PTR_MININGFACILITY;
+                case MapId.Torval: return MENU_PTR_TORVAL;
+                case MapId.Tempus: return MENU_PTR_TEMPUS;
+                case MapId.Maraxus: return MENU_PTR_MARAXUS;
+                case MapId.GhostStation: return MENU_PTR_GHOSTSTATION;
+                default: return MENU_PTR_MAIN;
+            }
+        }
+
+        public static bool IsInMenu()
+        {
+            return PCSX2.Read<byte>(GetMenuStart(GetMapId()) + MENU_OPEN_OFFSET) != 0;
+        }
+
+        private static bool HandleMenuChange(IntPtr offset, byte newValue, bool writeRefresh = false)
+        {
+            byte current = PCSX2.Read<byte>(offset);
+            if (current != newValue)
+            {
+                PCSX2.Write(offset, newValue);
+
+                // refresh
+                if (writeRefresh)
+                    PCSX2.Write(offset + 4, 5);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region Menu Update
+
+        public static void Read(this MenuUpdate player)
+        {
+            IntPtr menuStart = GetMenuStart(GetMapId());
+            if (menuStart == IntPtr.Zero)
+                return;
+
+            player.StartMenuSel = PCSX2.Read<byte>(menuStart + STARTMENU_SEL_OFFSET);
+
+            player.WeaponMenuSubmenuIndex = PCSX2.Read<byte>(menuStart + WEAPONMENU_SUBMENU_INDEX_OFFSET);
+            player.WeaponMenuSubmenuSel = PCSX2.Read<byte>(menuStart + WEAPONMENU_SUBMENU_SEL_OFFSET);
+            player.WeaponMenuWeaponSel = PCSX2.Read<byte>(menuStart + WEAPONMENU_WEAPON_SEL_OFFSET);
+            player.WeaponMenuOmegaSel = PCSX2.Read<byte>(menuStart + WEAPONMENU_OMEGA_SEL_OFFSET);
+            player.WeaponMenuAlphaSel = PCSX2.Read<byte>(menuStart + WEAPONMENU_ALPHA_SEL_OFFSET);
+
+            player.SkillsMenuSel = PCSX2.Read<byte>(menuStart + SKILLSMENU_SEL_OFFSET);
+            player.ChallengeMenuSel = PCSX2.Read<byte>(menuStart + CHALLENGEMENU_SEL_OFFSET);
+            player.ChangeChallengeDialogSel = PCSX2.Read<byte>(menuStart + CHANGECHALLENGEDIALOG_SEL_OFFSET);
+
+            player.PlanetMenuSel = PCSX2.Read<byte>(menuStart + PLANETMENU_SEL_OFFSET);
+            player.ChangePlanetDialogSel = PCSX2.Read<byte>(menuStart + CHANGEPLANETDIALOG_SEL_OFFSET);
+            player.PlanetChallengeMenuSel = PCSX2.Read<byte>(menuStart + PLANETMENU_CHALLENGE_SEL_OFFSET);
+
+            player.SaveMenuSel = PCSX2.Read<byte>(menuStart + SAVEMENU_SEL_OFFSET);
+            player.DifficultySel = PCSX2.Read<byte>(menuStart + DIFFICULTYMENU_SEL_OFFSET);
+        }
+
+        public static void Write(this MenuUpdate player, bool forceRefresh = false)
+        {
+            IntPtr menuStart = GetMenuStart(GetMapId());
+            if (menuStart == IntPtr.Zero)
+                return;
+
+            // Main select
+            if (player.StartMenuSel != 0xFF)
+                HandleMenuChange(menuStart + STARTMENU_SEL_OFFSET, player.StartMenuSel);
+
+            // Save game select
+            HandleMenuChange(menuStart + SAVEMENU_SEL_OFFSET, player.SaveMenuSel, true);
+
+            // Difficulty select
+            HandleMenuChange(menuStart + DIFFICULTYMENU_SEL_OFFSET, player.DifficultySel, true);
+
+            // Planet select with custom refresh
+            byte planetRefresh = PCSX2.Read<byte>(menuStart + PLANETMENU_SEL_REFRESH_OFFSET);
+            if (HandleMenuChange(menuStart + PLANETMENU_SEL_OFFSET, player.PlanetMenuSel, true) || (planetRefresh == 0 && forceRefresh))
+                PCSX2.Write(menuStart + PLANETMENU_SEL_REFRESH_OFFSET, 5);
+
+            // Planet challenge select
+            HandleMenuChange(menuStart + PLANETMENU_CHALLENGE_SEL_OFFSET, player.PlanetChallengeMenuSel, true);
+            
+            // Weapon select
+            byte weaponRefresh = PCSX2.Read<byte>(menuStart + WEAPONMENU_SUBMENU_REFRESH_OFFSET);
+            if (HandleMenuChange(menuStart + WEAPONMENU_WEAPON_SEL_OFFSET, player.WeaponMenuWeaponSel) || (weaponRefresh == 0x80 && forceRefresh))
+                PCSX2.Write(menuStart + WEAPONMENU_SUBMENU_REFRESH_OFFSET, 0x84);
+
+            // Mods
+            if (HandleMenuChange(menuStart + WEAPONMENU_OMEGA_SEL_OFFSET, player.WeaponMenuOmegaSel))
+                PCSX2.Write(menuStart + WEAPONMENU_SUBMENU_REFRESH_OFFSET, 0x88);
+
+            if (HandleMenuChange(menuStart + WEAPONMENU_ALPHA_SEL_OFFSET, player.WeaponMenuAlphaSel))
+                PCSX2.Write(menuStart + WEAPONMENU_SUBMENU_REFRESH_OFFSET, 0x88);
+
+            // Weapon submenu select
+            if (HandleMenuChange(menuStart + WEAPONMENU_SUBMENU_SEL_OFFSET, player.WeaponMenuSubmenuSel))
+                PCSX2.Write(menuStart + WEAPONMENU_SUBMENU_REFRESH_OFFSET, 0x88);
+            
+            // Submenu index
+            if (player.WeaponMenuSubmenuIndex > 1 && player.WeaponMenuSubmenuIndex < 4)
+                HandleMenuChange(menuStart + WEAPONMENU_SUBMENU_INDEX_OFFSET, player.WeaponMenuSubmenuIndex);
+            
+            // 
+            HandleMenuChange(menuStart + SKILLSMENU_SEL_OFFSET, player.SkillsMenuSel, true);
+            HandleMenuChange(menuStart + CHALLENGEMENU_SEL_OFFSET, player.ChallengeMenuSel, true);
+
+            // Dialog
+            HandleMenuChange(menuStart + CHANGECHALLENGEDIALOG_SEL_OFFSET, player.ChangeChallengeDialogSel);
+            HandleMenuChange(menuStart + CHANGEPLANETDIALOG_SEL_OFFSET, player.ChangePlanetDialogSel);
         }
 
         #endregion
