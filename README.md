@@ -7,6 +7,7 @@ This tool connects two players and synchronizes controller and game data between
 * [x] Synchronize Controller Inputs
 * [x] Synchronize Player Objects
 * [x] Synchronize Equipment
+* [ ] Synchronize Boss Health
 * [ ] Synchronize Stats
 * [x] Synchronize Game Progress
 * [ ] Synchronize Active Mission and Level

@@ -22,7 +22,8 @@ namespace DLMC.Launcher
         Torval = 10,
         Tempus = 11,
         Maraxus = 13,
-        GhostStation = 14
+        GhostStation = 14,
+        ControlLevel = 15
     }
 
     public static class Deadlocked
@@ -56,18 +57,19 @@ namespace DLMC.Launcher
         public static readonly IntPtr PLAYER_2_EQUIPPED_ITEM = (IntPtr)0x002206D4;
 
         // Menu pointers
-        public static readonly IntPtr MENU_PTR_MAIN = (IntPtr)0x00307254;
-        public static readonly IntPtr MENU_PTR_BATTLEDOME = (IntPtr)0x0032F294;
-        public static readonly IntPtr MENU_PTR_CATACROM = (IntPtr)0x0032BE14;
-        public static readonly IntPtr MENU_PTR_SARATHOS = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_DARKCATHEDRAL = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_SHAAR = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_VALIX = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_MININGFACILITY = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_TORVAL = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_TEMPUS = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_MARAXUS = (IntPtr)0x00;
-        public static readonly IntPtr MENU_PTR_GHOSTSTATION = (IntPtr)0x00;
+        public static readonly IntPtr MENU_START_MAIN = (IntPtr)0x00307254;
+        public static readonly IntPtr MENU_START_BATTLEDOME = (IntPtr)0x0032F294;
+        public static readonly IntPtr MENU_START_CATACROM = (IntPtr)0x0032BE14;
+        public static readonly IntPtr MENU_START_SARATHOS = (IntPtr)0x0032BD94;
+        public static readonly IntPtr MENU_START_DARKCATHEDRAL = (IntPtr)0x0032C1D4;
+        public static readonly IntPtr MENU_START_SHAAR = (IntPtr)0x0032BCD4;
+        public static readonly IntPtr MENU_START_MININGFACILITY = (IntPtr)0x0032BCD4;
+        public static readonly IntPtr MENU_START_VALIX = (IntPtr)0x0032BC54;
+        public static readonly IntPtr MENU_START_TORVAL = (IntPtr)0x0032BFD4;
+        public static readonly IntPtr MENU_START_TEMPUS = (IntPtr)0x0032BD54;
+        public static readonly IntPtr MENU_START_MARAXUS = (IntPtr)0x0032BFD4;
+        public static readonly IntPtr MENU_START_GHOSTSTATION = (IntPtr)0x0032BE94;
+        public static readonly IntPtr MENU_START_CONTROLLEVEL = (IntPtr)0x0032BDD4;
 
         // Menu offsets from respective menu pointers
         public static readonly int CHANGECHALLENGEDIALOG_SEL_OFFSET = -0x1CC;
@@ -281,18 +283,19 @@ namespace DLMC.Launcher
         {
             switch (map)
             {
-                case MapId.Battledome: return MENU_PTR_BATTLEDOME;
-                case MapId.Catacrom: return MENU_PTR_CATACROM;
-                case MapId.Sarathos: return MENU_PTR_SARATHOS;
-                case MapId.DarkCathedral: return MENU_PTR_DARKCATHEDRAL;
-                case MapId.Shaar: return MENU_PTR_SHAAR;
-                case MapId.Valix: return MENU_PTR_VALIX;
-                case MapId.MiningFacility: return MENU_PTR_MININGFACILITY;
-                case MapId.Torval: return MENU_PTR_TORVAL;
-                case MapId.Tempus: return MENU_PTR_TEMPUS;
-                case MapId.Maraxus: return MENU_PTR_MARAXUS;
-                case MapId.GhostStation: return MENU_PTR_GHOSTSTATION;
-                default: return MENU_PTR_MAIN;
+                case MapId.Battledome: return MENU_START_BATTLEDOME;
+                case MapId.Catacrom: return MENU_START_CATACROM;
+                case MapId.Sarathos: return MENU_START_SARATHOS;
+                case MapId.DarkCathedral: return MENU_START_DARKCATHEDRAL;
+                case MapId.Shaar: return MENU_START_SHAAR;
+                case MapId.Valix: return MENU_START_VALIX;
+                case MapId.MiningFacility: return MENU_START_MININGFACILITY;
+                case MapId.Torval: return MENU_START_TORVAL;
+                case MapId.Tempus: return MENU_START_TEMPUS;
+                case MapId.Maraxus: return MENU_START_MARAXUS;
+                case MapId.GhostStation: return MENU_START_GHOSTSTATION;
+                case MapId.ControlLevel: return MENU_START_CONTROLLEVEL;
+                default: return MENU_START_MAIN;
             }
         }
 
