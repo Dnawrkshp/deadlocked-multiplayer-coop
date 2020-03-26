@@ -19,9 +19,7 @@ This tool connects two players and synchronizes controller and game data between
 * Visual Studio 2017
 * .NET Framework 4.0
 
-## Setup and Debugging
-
-Currently testing requires cloning and building the project from scratch. This will help set you up.
+## Debugging
 
 ### Step 1: Setup Environment Variables for Debugging
 
@@ -37,7 +35,13 @@ or
 
 `DLMC.Launcher.exe host -p 19001 --pcsx2 PATH_TO_NEW_PCSX2_EXE --dl PATH_TO_DL_ISO`
 
-### Step 3: Setup Pad Hook in PCSX2
+### Step 3: Clone and Build
+
+Clone the repo and build the project in Visual Studio 2017. Take a look at the `DEBUG_SERVER` and `DEBUG_CLIENT` build configurations.
+
+## Setup
+
+### Step 1: Setup Pad Hook in PCSX2
 
 In order for the pad hook to work you need to enable cheats and place the following codes into the `9BFBCD42.pnach` cheats file:
 
@@ -72,13 +76,17 @@ patch=1,EE,200f004C,extended,dc680018
 patch=1,EE,200f0050,extended,03e00008
 ```
 
-### Step 4: Configure Controller in PCSX2
+### Step 2: Configure Controller in PCSX2
 
 If you're planning to be the host, then you will be player 1. Make sure that your controller config is setup for player 1.
 
 If you're the client, connecting to the host, then you will be player 2. Make sure that your controller/keyboard is setup to affect player 2.
 
-### Step 5: Hosting and Connecting
+### Step 3: Download Latest Build
+
+Head over to the Releases page and grab the latest build. It's a commandline tool so be ready to use cmd or powershell to run it.
+
+### Step 4: Hosting and Connecting
 
 If you plan on hosting, you'll need to port forward whichever port you choose to use for UDP. The default port is 19001. After port forwarding, open an instance of cmd in the build directory. Run the following command:
 
@@ -90,7 +98,7 @@ If you plan on connecting to the host, you'll simply need the host's public ip a
 
 `DLMC.Launcher.exe connect -h PUBLIC_IP_ADDRESS -p PORT --pcsx2 PATH_TO_PCSX2_EXE --dl PATH_TO_DL_ISO`
 
-### Step 6: Connecting
+### Step 5: Connecting
 
 After connecting a new instance of PCSX2 will launch on both peers. It will automatically start the provided iso. You are welcome to have an instance already running and simply omit the paths to PCSX2 and the DL ISO if you'd like the program to hook into your running instance.
 
