@@ -25,7 +25,8 @@ namespace DLMC.Shared.Message
 
         PadUpdate,
         PlayerUpdate,
-        GameStateUpdate,
+        ProgressUpdate,
+        EquipmentUpdate,
         MenuUpdate,
     }
 

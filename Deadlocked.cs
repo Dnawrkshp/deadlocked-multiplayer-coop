@@ -46,6 +46,15 @@ namespace DLMC.Launcher
         // Offset from level pointer to the array of player struct pointers
         public static readonly int PLAYER_STRUCT_ARRAY_OFFSET = -0x5E54;
 
+        // Static address of player equipped weapons
+        public static readonly IntPtr PLAYER_1_EQUIPPED_LIST = (IntPtr)0x0020C690;
+        public static readonly IntPtr PLAYER_2_EQUIPPED_LIST = (IntPtr)0x0020C69C;
+
+        // Static address of player equipped item
+        // This doesn't change the equipped item. It is just for reading.
+        public static readonly IntPtr PLAYER_1_EQUIPPED_ITEM = (IntPtr)0x002206D0;
+        public static readonly IntPtr PLAYER_2_EQUIPPED_ITEM = (IntPtr)0x002206D4;
+
         // Menu pointers
         public static readonly IntPtr MENU_PTR_MAIN = (IntPtr)0x00307254;
         public static readonly IntPtr MENU_PTR_BATTLEDOME = (IntPtr)0x0032F294;
@@ -61,7 +70,6 @@ namespace DLMC.Launcher
         public static readonly IntPtr MENU_PTR_GHOSTSTATION = (IntPtr)0x00;
 
         // Menu offsets from respective menu pointers
-
         public static readonly int CHANGECHALLENGEDIALOG_SEL_OFFSET = -0x1CC;
         public static readonly int CHANGEPLANETDIALOG_SEL_OFFSET = -0x20;
 
@@ -92,6 +100,25 @@ namespace DLMC.Launcher
 
         // Current map id
         public static readonly IntPtr MAP_ID = (IntPtr)0x001CEBF8;
+
+        // Skill points
+        public static readonly IntPtr GAMESTATE_SKILLPOINTS = (IntPtr)0x00171BA8;
+        public static readonly int GAMESTATE_SKILLPOINTS_SIZE = 0x40;
+        
+        public static readonly IntPtr GAMESTATE_ALPHA_OMEGA_MODS = (IntPtr)0x001D3FB0;
+        public static readonly int GAMESTATE_ALPHA_OMEGA_MODS_SIZE = 0xC;
+
+        public static readonly IntPtr GAMESTATE_EQUIPMENT = (IntPtr)0x001D4A48;
+        public static readonly int GAMESTATE_EQUIPMENT_SIZE = 0x44 * 14;
+
+        public static readonly IntPtr GAMESTATE_BOLTS = (IntPtr)0x00171B40;
+        public static readonly int GAMESTATE_BOLTS_EXP_POINTS_SIZE = 0x100;
+
+        public static readonly IntPtr STATS_WEAPONS = (IntPtr)0x0020B53C;
+        public static readonly int STATS_WEAPONS_SIZE = 0x40;
+
+        public static readonly IntPtr LEVEL_PROGRESS_START = (IntPtr)0x001F87F0;
+        public static readonly int LEVEL_PROGRESS_SIZE = 0x300 * 14;
 
 
         #region Map Id
@@ -141,7 +168,7 @@ namespace DLMC.Launcher
 
         #region Player
 
-        public static IntPtr GetPlayerStructPointer(MapId map, int playerIndex)
+        public static IntPtr GetPlayerStructPointer(int playerIndex)
         {
             return (IntPtr)PCSX2.Read<int>((IntPtr)PCSX2.Read<int>(LEVEL_PTR) + PLAYER_STRUCT_ARRAY_OFFSET + (playerIndex * 4));
         }
@@ -150,8 +177,9 @@ namespace DLMC.Launcher
 
         #region Player Update
 
-        public static void Read(this PlayerUpdate player, IntPtr playerStruct)
+        public static void Read(this PlayerUpdate player, int playerIndex)
         {
+            var playerStruct = GetPlayerStructPointer(playerIndex);
             if (playerStruct == IntPtr.Zero)
                 return;
 
@@ -159,6 +187,7 @@ namespace DLMC.Launcher
             byte[] rotation = PCSX2.Read(playerStruct + 0xB8, 4);
             byte[] yaw = PCSX2.Read(playerStruct + 0x19B0, 4);
             byte[] pitch = PCSX2.Read(playerStruct + 0x19D0, 4);
+            byte[] equipped = PCSX2.Read(playerIndex == 0 ? PLAYER_1_EQUIPPED_LIST : PLAYER_2_EQUIPPED_LIST, 12);
 
             player.PositionX = BitConverter.ToSingle(position, 0);
             player.PositionY = BitConverter.ToSingle(position, 4);
@@ -166,10 +195,17 @@ namespace DLMC.Launcher
             player.Rotation = BitConverter.ToSingle(rotation, 0);
             player.CameraYaw = BitConverter.ToSingle(yaw, 0);
             player.CameraPitch = BitConverter.ToSingle(pitch, 0);
+            player.Health = PCSX2.Read<float>(playerStruct + 0x2E20);
+            player.EquippedItem = PCSX2.Read<byte>(playerStruct + 0x268C);
+            player.Primary = equipped[0];
+            player.Secondary = equipped[4];
+            player.Tertiary = equipped[8];
         }
 
-        public static void Write(this PlayerUpdate player, IntPtr playerStruct)
+        public static void Write(this PlayerUpdate player, int playerIndex)
         {
+            var playerStruct = GetPlayerStructPointer(playerIndex);
+            var playerEquippedAddress = playerIndex == 0 ? PLAYER_1_EQUIPPED_LIST : PLAYER_2_EQUIPPED_LIST;
             if (playerStruct == IntPtr.Zero)
                 return;
 
@@ -179,12 +215,21 @@ namespace DLMC.Launcher
             PCSX2.Write(playerStruct + 0xB8, player.Rotation);
             PCSX2.Write(playerStruct + 0x19B0, player.CameraYaw);
             PCSX2.Write(playerStruct + 0x19D0, player.CameraPitch);
+
+            PCSX2.Write(playerStruct + 0x2E20, player.Health);
+
+            PCSX2.Write(playerStruct + 0x24B0, player.EquippedItem);
+            PCSX2.Write(playerStruct + 0x268C, player.EquippedItem);
+
+            PCSX2.Write(playerEquippedAddress, player.Primary);
+            PCSX2.Write(playerEquippedAddress+4, player.Secondary);
+            PCSX2.Write(playerEquippedAddress+8, player.Tertiary);
         }
 
-        public static void Lerp(this PlayerUpdate player, IntPtr playerStruct)
+        public static void Lerp(this PlayerUpdate player, int playerIndex)
         {
             PlayerUpdate current = new PlayerUpdate();
-            current.Read(playerStruct);
+            current.Read(playerIndex);
 
             float pLerpTime = 1 - (float)Math.Exp(-Config.PositionSharpness * Shared.LogicTimer.FixedDelta);
             float rLerpTime = 1f; // 1 - (float)Math.Exp(-Config.PositionSharpness * Shared.LogicTimer.FixedDelta);
@@ -205,7 +250,7 @@ namespace DLMC.Launcher
             if (Math.Abs(current.PositionZ - player.PositionZ) > Config.MaxPositionDeltaBeforeTeleport)
                 current.PositionZ = player.PositionZ;
             else
-                current.PositionZ = current.PositionZ.Lerp(player.PositionX, pLerpTime);
+                current.PositionZ = current.PositionZ.Lerp(player.PositionZ, pLerpTime);
 
             // Lerp rotation
             current.Rotation = current.Rotation.Lerp(player.Rotation, rLerpTime);
@@ -213,6 +258,18 @@ namespace DLMC.Launcher
             // Lerp camera rotation
             current.CameraPitch = current.CameraPitch.Lerp(player.CameraPitch, 1f);
             current.CameraYaw = current.CameraYaw.Lerp(player.CameraYaw, 1f);
+
+            // 
+            current.Health = player.Health;
+
+            // 
+            current.EquippedItem = player.EquippedItem;
+            current.Primary = player.Primary;
+            current.Secondary = player.Secondary;
+            current.Tertiary = player.Tertiary;
+
+            // 
+            current.Write(playerIndex);
         }
 
         #endregion
@@ -342,6 +399,67 @@ namespace DLMC.Launcher
             // Dialog
             HandleMenuChange(menuStart + CHANGECHALLENGEDIALOG_SEL_OFFSET, player.ChangeChallengeDialogSel);
             HandleMenuChange(menuStart + CHANGEPLANETDIALOG_SEL_OFFSET, player.ChangePlanetDialogSel);
+        }
+
+        #endregion
+
+
+        #region Progress Update
+
+        public static void Read(this ProgressUpdate progress)
+        {
+            if (progress.LevelProgress == null || progress.LevelProgress.Length != LEVEL_PROGRESS_SIZE)
+                progress.LevelProgress = new byte[LEVEL_PROGRESS_SIZE];
+
+            if (progress.BoltsExpPoints == null || progress.BoltsExpPoints.Length != GAMESTATE_BOLTS_EXP_POINTS_SIZE)
+                progress.BoltsExpPoints = new byte[GAMESTATE_BOLTS_EXP_POINTS_SIZE];
+
+            if (progress.Skillpoints == null || progress.Skillpoints.Length != GAMESTATE_SKILLPOINTS_SIZE)
+                progress.Skillpoints = new byte[GAMESTATE_SKILLPOINTS_SIZE];
+
+            if (progress.AlphaOmegaMods == null || progress.AlphaOmegaMods.Length != GAMESTATE_ALPHA_OMEGA_MODS_SIZE)
+                progress.AlphaOmegaMods = new byte[GAMESTATE_ALPHA_OMEGA_MODS_SIZE];
+
+            // Read
+            PCSX2.Read(LEVEL_PROGRESS_START, progress.LevelProgress, LEVEL_PROGRESS_SIZE);
+            PCSX2.Read(GAMESTATE_BOLTS, progress.BoltsExpPoints, GAMESTATE_BOLTS_EXP_POINTS_SIZE);
+            PCSX2.Read(GAMESTATE_SKILLPOINTS, progress.Skillpoints, GAMESTATE_SKILLPOINTS_SIZE);
+            PCSX2.Read(GAMESTATE_ALPHA_OMEGA_MODS, progress.AlphaOmegaMods, GAMESTATE_ALPHA_OMEGA_MODS_SIZE);
+        }
+
+        public static void Write(this ProgressUpdate progress)
+        {
+            if (progress.LevelProgress != null)
+                PCSX2.Write(LEVEL_PROGRESS_START, progress.LevelProgress);
+
+            if (progress.BoltsExpPoints != null)
+                PCSX2.Write(GAMESTATE_BOLTS, progress.BoltsExpPoints);
+
+            if (progress.Skillpoints != null)
+                PCSX2.Write(GAMESTATE_SKILLPOINTS, progress.Skillpoints);
+
+            if (progress.AlphaOmegaMods != null)
+                PCSX2.Write(GAMESTATE_ALPHA_OMEGA_MODS, progress.AlphaOmegaMods);
+        }
+
+        #endregion
+
+
+        #region Equipment Update
+
+        public static void Read(this EquipmentUpdate equipment)
+        {
+            if (equipment.Equipment == null || equipment.Equipment.Length != GAMESTATE_EQUIPMENT_SIZE)
+                equipment.Equipment = new byte[GAMESTATE_EQUIPMENT_SIZE];
+
+            // Read
+            PCSX2.Read(GAMESTATE_EQUIPMENT, equipment.Equipment, GAMESTATE_EQUIPMENT_SIZE);
+        }
+
+        public static void Write(this EquipmentUpdate equipment)
+        {
+            if (equipment.Equipment != null)
+                PCSX2.Write(GAMESTATE_EQUIPMENT, equipment.Equipment);
         }
 
         #endregion

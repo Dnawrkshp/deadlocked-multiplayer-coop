@@ -14,7 +14,6 @@ namespace DLMC.Launcher.Net
     {
         ConnectOptions _options = null;
 
-        float _time = 0f;
         float _timeSincePlanetSelChanged = 0f;
         float _timeSinceWeaponMenuSelChanged = 0f;
 
@@ -31,14 +30,6 @@ namespace DLMC.Launcher.Net
             client.OnMessage += OnMessage;
 
             client.Connect(_options.Hostname, _options.Port);
-        }
-
-        protected override void OnTick()
-        {
-            base.OnTick();
-
-            // increment time
-            _time += LogicTimer.FixedDelta;
         }
 
         protected override void OnClientConnected()
@@ -74,6 +65,24 @@ namespace DLMC.Launcher.Net
                             _time - _timeSinceWeaponMenuSelChanged < Config.MenuForceRefreshPeriod;
 
             menu.Write(forceRefresh);
+        }
+
+        protected override void OnProgressUpdate(ProgressUpdate progress)
+        {
+            // 
+            base.OnProgressUpdate(progress);
+
+            // 
+            progress.Write();
+        }
+
+        protected override void OnEquipmentUpdate(EquipmentUpdate equipment)
+        {
+            //
+            base.OnEquipmentUpdate(equipment);
+
+            //
+            equipment.Write();
         }
     }
 }

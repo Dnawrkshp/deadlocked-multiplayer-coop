@@ -13,6 +13,9 @@ namespace DLMC.Launcher.Net
     {
         HostOptions _options = null;
 
+        private float _timeLastProgressUpdate = 0f;
+        private float _timeLastEquipmentUpdate = 0f;
+
         public Server(HostOptions options)
         {
             _options = options;
@@ -34,6 +37,31 @@ namespace DLMC.Launcher.Net
 
             if (!PCSX2.HasInstance())
                 PCSX2.Start(_options.PCSX2Path, _options.DLPath);
+        }
+
+        protected override void OnTick()
+        {
+            // 
+            base.OnTick();
+
+            if (IsConnected && _mapId != MapId.MainMenu)
+            {
+                if (_time - _timeLastProgressUpdate > Config.SendProgressUpdateInterval)
+                {
+                    // Send progress
+                    _cachedLocalProgressUpdate.Read();
+                    _logic.Send(_cachedLocalProgressUpdate);
+                    _timeLastProgressUpdate = _time;
+                }
+
+                if (_time - _timeLastEquipmentUpdate > Config.SendEquipmentUpdateInterval)
+                {
+                    // Send progress
+                    _cachedLocalEquipmentUpdate.Read();
+                    _logic.Send(_cachedLocalEquipmentUpdate);
+                    _timeLastEquipmentUpdate = _time;
+                }
+            }
         }
 
         protected override void OnMenuUpdate(MenuUpdate menu)

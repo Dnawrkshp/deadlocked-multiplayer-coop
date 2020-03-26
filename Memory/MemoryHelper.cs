@@ -107,6 +107,12 @@ namespace DLMC.Launcher.Memory
             return buffer;
         }
 
+        public void Read(IntPtr address, byte[] destination, int length)
+        {
+            int bytesRead = 0;
+            ReadProcessMemory((int)_processHandle, (int)address, destination, length, ref bytesRead);
+        }
+
         private byte[] ToBuffer<T>(T value)
         {
             Type t = typeof(T);

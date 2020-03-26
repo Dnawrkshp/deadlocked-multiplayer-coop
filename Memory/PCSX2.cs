@@ -132,7 +132,19 @@ namespace DLMC.Launcher.Memory
 
             return null;
         }
-        
+
+        public static void Read(IntPtr address, byte[] destination, int length)
+        {
+            try
+            {
+                _singleton._memoryHelper.Read(address.MapToPCSX2(), destination, length);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
         #endregion
 
     }

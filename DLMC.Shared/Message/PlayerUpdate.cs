@@ -20,6 +20,13 @@ namespace DLMC.Shared.Message
         public float CameraYaw;
         public float CameraPitch;
 
+        public float Health;
+
+        public byte EquippedItem;
+        public byte Primary;
+        public byte Secondary;
+        public byte Tertiary;
+
         public override void Deserialize(NetDataReader reader)
         {
             // Deserialize base
@@ -32,6 +39,13 @@ namespace DLMC.Shared.Message
             Rotation = reader.GetFloat();
             CameraYaw = reader.GetFloat();
             CameraPitch = reader.GetFloat();
+
+            Health = reader.GetFloat();
+
+            EquippedItem = reader.GetByte();
+            Primary = reader.GetByte();
+            Secondary = reader.GetByte();
+            Tertiary = reader.GetByte();
         }
 
         public override void Serialize(NetDataWriter writer)
@@ -46,6 +60,14 @@ namespace DLMC.Shared.Message
             writer.Put(Rotation);
             writer.Put(CameraYaw);
             writer.Put(CameraPitch);
+
+            writer.Put(Health);
+
+            writer.Put(EquippedItem);
+            writer.Put(Primary);
+            writer.Put(Secondary);
+            writer.Put(Tertiary);
+
         }
     }
 }
