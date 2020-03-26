@@ -2,16 +2,16 @@
 
 This tool connects two players and synchronizes controller and game data between them on Ratchet: Deadlocked. It works by hooking itself into the pad read subroutine and replacing the appropriate controller inputs with a remote player's. Additional data, like position and rotation, are sent rapidly in game and interpolated on the client to prevent desynchronization.
 
-Currently, this tool does not synchronize the menu navigation or game saves.
-
 ## State
 
 * [x] Synchronize Controller Inputs
 * [x] Synchronize Player Objects
-* [ ] Synchronize Equipment
+* [x] Synchronize Equipment
 * [ ] Synchronize Stats
-* [ ] Synchronize Game Progress
-* [ ] Synchronize Menu Navigation
+* [x] Synchronize Game Progress
+* [ ] Synchronize Active Mission and Level
+* [x] Synchronize Menu Selection
+* [ ] Synchronize Active Menu
 * [ ] Handle Disconnection
 
 ## Build
@@ -94,6 +94,6 @@ If you plan on connecting to the host, you'll simply need the host's public ip a
 
 After connecting a new instance of PCSX2 will launch on both peers. It will automatically start the provided iso. You are welcome to have an instance already running and simply omit the paths to PCSX2 and the DL ISO if you'd like the program to hook into your running instance.
 
-Since menu navigation and game saves aren't synchronized, both peers must be in the same menu with the same selected menu item at the start. Saves need to be identical, otherwise it could lead to crashes. I recommend creating a new save with the other person to ensure identical saves.
+Since active menu and mission/level aren't synchronized, both peers must start in the same menu and level/mission. I recommend creating a new save with the other person to ensure identical starting points.
 
-It is still possible for menu navigation to become desynchronized so don't be too quick when navigating.
+It is still possible for menu navigation to become desynchronized when a player goes through menus too quickly. Be sure to give time for the other client to catch up before entering or exiting a menu.
